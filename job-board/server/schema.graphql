@@ -1,0 +1,24 @@
+type Query {
+    jobs:[Job!]
+}
+
+type Company{
+    id:ID!
+    name: String!
+    description: String
+}
+
+
+#Regular comment will not be displayed in documentation.
+"""
+Represent a job ad posted on our board.
+"""
+type Job{
+    id: ID!
+    """The __date__ when the job was published, in ISO-8601 format. E.g. `2022-12-31`."""
+    date: String!
+    title: String!
+    company: Company!
+    description: String
+}
+
