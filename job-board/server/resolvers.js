@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql'
 import { getCompany } from './db/companies.js'
 import {getJob, getJobsByCompany, getJobs, createJob, deleteJob, updateJob} from './db/jobs.js'
+import { UnauthorizedError } from 'express-jwt'
 
 export const resolvers ={
     Query:{
@@ -21,13 +22,32 @@ export const resolvers ={
         jobs : ()=> getJobs()
     },
     Mutation:{
-        createJob: (_root,{input:{title,description}})=>{
-            const companyId = "FjcJCHJALA4i" //TODO set based on user
-            return createJob({title,description, companyId:companyId})
+        createJob: (_root,{input:{title,description}}, {user})=>{
+            if(!user){
+                throw unauthoriedError('missing authentication')
+            }
+            return createJob({title,description, companyId:user.companyId})
         },
-        deleteJob:(_root,{id})=> deleteJob(id),
-        updateJob:(_root,{input:{id,title,description}})=>{
-            return updateJob({id,title,description})
+        deleteJob: async (_root,{id},{user})=> {
+            if(!user){
+                throw unauthoriedError('missing authentication')
+            }
+
+            const job = await deleteJob(id,user.companyId)
+            if(!job){
+                throw notFoundError('No Job found')
+            }
+            return job;
+        },
+        updateJob:async(_root,{input:{id,title,description}},{user})=>{
+            if(!user){
+                throw unauthoriedError('missing authentication')
+            }
+            const job = await updateJob({id,title,description, companyId:user.companyId})
+            if(!job){
+                throw notFoundError('No Job Found')
+            }
+            return job
         }
     },
     Company:{
@@ -43,6 +63,11 @@ export const resolvers ={
 function notFoundError(message){
     return new GraphQLError(message,{
         extensions: {code: 'NOT_FOUND'}
+    })
+}
+function unauthoriedError(message){
+    return new GraphQLError(message,{
+        extensions: {code: 'UNAUTHORIZED'}
     })
 }
 
