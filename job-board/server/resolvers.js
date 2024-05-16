@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql'
 import {  getCompany } from './db/companies.js'
-import {getJob, getJobsByCompany, getJobs, createJob, deleteJob, updateJob} from './db/jobs.js'
+import {getJob, getJobsByCompany, getJobs, createJob, deleteJob, updateJob, countJobs} from './db/jobs.js'
 
 export const resolvers ={
     Query:{
@@ -18,7 +18,11 @@ export const resolvers ={
             }
             return job
         },
-        jobs : ()=> getJobs()
+        jobs : async (_root,{limit, offset})=> {
+            const items = await getJobs(limit,offset)
+            const totalCount = await countJobs();
+            return {items,totalCount}
+        }
     },
     Mutation:{
         createJob: (_root,{input:{title,description}}, {user})=>{

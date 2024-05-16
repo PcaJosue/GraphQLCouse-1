@@ -1,13 +1,13 @@
 type Query {
     company(id:ID!):Company
     job(id:ID!): Job
-    jobs:[Job!]
+    jobs(limit:Int, offset:Int):JobSubList
 }
 
 type Mutation{
     createJob(input:CreateJobInput!):Job
     deleteJob(id:ID!):Job
-    updateJob(input:UpdateJobInput!):Job
+    updateJob(input:UpdateJobInput!):JobSubList
 }
 
 type Company{
@@ -18,6 +18,10 @@ type Company{
 }
 
 
+type JobSubList{
+    items: [Job!]!
+    totalCount: Int!
+}
 #Regular comment will not be displayed in documentation.
 """
 Represent a job ad posted on our board.
