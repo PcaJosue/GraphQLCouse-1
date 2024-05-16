@@ -1,7 +1,6 @@
 import { GraphQLError } from 'graphql'
-import { getCompany } from './db/companies.js'
+import {  getCompany } from './db/companies.js'
 import {getJob, getJobsByCompany, getJobs, createJob, deleteJob, updateJob} from './db/jobs.js'
-import { UnauthorizedError } from 'express-jwt'
 
 export const resolvers ={
     Query:{
@@ -55,7 +54,9 @@ export const resolvers ={
     }, 
     Job:{
         date: (job)=> toISODate(job.createdAt),
-        company:(job)=> getCompany(job.companyId)
+        company:(job,_args,{companyLoader})=> {
+            return companyLoader.load(job.companyId)
+        }
 
     }
 }
